@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown>
+					<textarea data-template>
+						Automating creation of Software Bills of Materials:
+
+						Generating SPDX documents for CMake and Zephyr
+
+						---	
+
+						Steve Winslow
+
+						steve@swinslow.net
+
+						slides and talk: CC-BY-4.0
+
+						[github.com/swinslow/slides](https://github.com/swinslow/slides)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr
+
+						RTOS for resource-constrained devices, &gt;200 boards
+
+						* [CMake](https://cmake.org/) to manage builds
+						* [west](https://docs.zephyrproject.org/latest/guides/west/index.html) as meta-tool for builds and other actions
+
+						https://zephyrproject.org
+
+						<img src="https://www.zephyrproject.org/wp-content/uploads/sites/38/2020/08/zephyr_whitetext.svg" width=400 />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Goal
+
+						Create a Zephyr bill-of-materials at build time
+
+						---
+
+						Express metadata about:
+
+						* file hashes
+						* licenses
+						* relationships
+
+						for sources as well as build artifacts
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Objectives
+
+						<p class="fragment">make it fully automated</p>
+						<p class="fragment">don't leverage external knowledge sources</p>
+						<p class="fragment">don't rewrite existing build systems</p>
+						<p class="fragment" style="font-size:xx-large">(also don't know much about them)</p>
+						<p class="fragment">make it Zephyr-agnostic</p>
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Proof of concept
+
+						cmake-spdx
+
+						[github.com/swinslow/cmake-spdx/](https://https://github.com/spdx/spdx-spec/)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### SPDX
+
+						An open standard for communicating software bill of material information, including:
+						* components
+						* licenses
+						* copyrights
+						* security references
+
+						https://spdx.dev
+
+						<img src="https://swinslow.net/images/SPDX_Logo_White_bg.png" width=300 />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### CMake file-based API
+
+						1. Create query directory
+						2. Add zero-byte query file
+						3. Run CMake
+						4. CMake outputs build metadata
+
+						https://cmake.org/cmake/help/latest/manual/cmake-file-api.7.html
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### cmake-spdx process (1/2)
+
+						1. Enable CMake file-based API
+						2. Run CMake
+						3. Run Zephyr build
+						4. Walk through sources and create SPDX document
+						  - collect file hashes
+						  - look for `SPDX-License-Identifier`
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### cmake-spdx process (2/2)
+
+						5. Walk through build artifacts and create SPDX document
+						6. Parse CMake JSON responses
+						  - codemodel
+						  - projects, targets, directories
+						7. Add relationships to SPDX build document
+						  - `GENERATED_FROM`
+						  - `STATIC_LINK`
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### SPDX document: Sources
+
+						<img src="https://swinslow.net/images/spdx-sources-1.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### SPDX document: Build artifacts
+
+						<img src="https://swinslow.net/images/spdx-build-1.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### SPDX document: Relationships
+
+						<img src="https://swinslow.net/images/spdx-build-2.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Interesting findings (1/2)
+
+						* CMake API data on build artifacts is incomplete
+						* Found some invalid license IDs in Zephyr code
+						* Graphviz output to visualize CMake target relationships
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Interesting findings (2/2)
+
+						<img src="https://swinslow.net/images/cmake-graphviz.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Next steps
+
+						Contributing to Zephyr, under review:
+
+						[zephyrproject-rtos](https://github.com/zephyrproject-rtos)/[zephyr](https://github.com/zephyrproject-rtos/zephyr): [#31065](https://github.com/zephyrproject-rtos/zephyr/pull/31065)
+
+						Auto-conclude binary licenses from source IDs
+
+						Cleanup handling directories, license IDs
+
+						[next-steps.md](https://github.com/swinslow/cmake-spdx/blob/master/docs/next-steps.md)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Takeaways
+
+						Software bills of materials can be created:
+
+						* automatically
+						* at build time
+						* without rewriting build systems (sometimes)
+						* without external knowledge sources
+						* in a standardized SBOM format
+
+						Start small, improve over time
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Resources
+
+						* cmake-spdx:
+						  - [example CMake file-based API replies](https://github.com/swinslow/cmake-spdx/tree/master/example/api-example-reply/api/v1/reply)
+						  - [running cmake-spdx](https://github.com/swinslow/cmake-spdx/blob/master/docs/process.md)
+						  - [cmake-spdx internals](https://github.com/swinslow/cmake-spdx/blob/master/docs/internals.md)
+						* SPDX:
+						  - [specification dev repo](https://github.com/spdx/spdx-spec/)
+						  - [past specifications](https://spdx.dev/specifications/)
+						  - [short-form license IDs](https://spdx.dev/ids)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						## Thank you
+
+						slides: [github.com/swinslow/slides](https://github.com/swinslow/slides)
+					</textarea>
+				</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+
+				transition: 'none',
+				transitionSpeed: 'fast'
+			});
+		</script>
+	</body>
+</html>
