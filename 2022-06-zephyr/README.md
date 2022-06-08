@@ -1,4 +1,4 @@
-This directory contains slides for [my talk](UPDATE) "Next Steps for Software Bill of Materials (SBOM) Generation in Zephyr" at [Zephyr Developer Summit 2022](UPDATE).
+This directory contains slides for [my talk](https://zephyr2022.sched.com/event/2a02089ae6cdecfafedcb0a541d015b7) "Next Steps for Software Bill of Materials (SBOM) Generation in Zephyr" at [Zephyr Developer Summit 2022](https://zephyr2022.sched.com).
 
 A [PDF of the slides](2022-06-08-Zephyr-SBOM.pdf) is available here.
 
