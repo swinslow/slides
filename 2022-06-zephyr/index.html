@@ -1,0 +1,307 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Zephyr Developer Summit 2022: SBOM Generation in Zephyr</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown>
+					<textarea data-template>
+						Next Steps for Software Bill of Materials (SBOM) Generation in Zephyr
+
+						- - -
+
+						Steve Winslow
+
+						[Boston Tech Law](https://www.bostechlaw.com/steve-winslow)
+
+						steve@swinslow.net
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Agenda
+
+						1. Intro to SBOM / SPDX
+						2. Zephyr and SPDX
+						3. Implementation Details
+						4. Group Discussion
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### What is an SBOM?
+
+						Software Bill of Materials
+
+						_"a formal record containing the details and supply chain relationships of various components used in building software"_ - [ntia.gov/SBOM](https://www.ntia.doc.gov/files/ntia/publications/ntia_sbom_energy_jan2021overview_0.pdf)
+
+						[<img src="images/ntia-sbom.png" />](https://ntia.gov/SBOM)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### What is SPDX?
+
+						Software Package Data Exchange
+
+						_"An open standard for communicating software bill of material information, including components, licenses, copyrights, and security references"_ - [spdx.dev](https://spdx.dev)
+
+						ISO/IEC 5962:2021 ([ISO spec](https://www.iso.org/standard/81870.html), [ISO PAS](https://standards.iso.org/ittf/PubliclyAvailableStandards/index.html), [latest](https://spdx.github.io/spdx-spec/))
+
+						[<img src="images/spdx.png" />](https://spdx.dev)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						Added in 2.6.0: [`west spdx`](https://docs.zephyrproject.org/latest/develop/west/zephyr-cmds.html#west-spdx)
+
+						Create SPDX documents simultaneously with Zephyr `west build`; one additional command
+
+						Leverages CMake [file-based API metadata](https://cmake.org/cmake/help/latest/manual/cmake-file-api.7.html)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						<img src="images/z1.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						<img src="images/z2.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						* SPDX Documents for:
+						  1. Zephyr sources
+						  2. (optionally) sources used from SDK
+						  3. application sources
+						  4. build outputs
+						* hashes for file integrity
+						* relationships for tracing compiles, linking
+						* license data from SPDX-License-Identifier tags
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						<img src="images/z4.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						<img src="images/z5.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Zephyr and SPDX
+
+						<img src="images/z6.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Benefits
+
+						1. traceability and security
+						2. evidence from build time
+						3. license info management
+						4. standardized / interchangeable
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### CMake metadata
+
+						To activate, create empty file at:
+
+						`$BUILD_DIR/.cmake/api/v1/query/codemodel-v2`
+
+						- - -
+
+						When building, CMake outputs metadata at:
+
+						`$BUILD_DIR/.cmake/api/v1/reply/`
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### CMake metadata
+
+						Outputs JSON metadata file for each build stage target:
+
+						* target file being built (e.g. `libkernel.a`)
+						* target dependencies (prior build stages)
+						* source files
+						* compiler command-line options used
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### CMake metadata
+
+						<img src="images/z3.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### CMake metadata
+
+						<img src="images/cmake-graphviz.png" />
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### zspdx
+
+						`/scripts/west_commands/zspdx/`
+
+						Main entry point in `sbom.py`
+
+						Call from command line via [`west spdx`](https://docs.zephyrproject.org/latest/develop/west/zephyr-cmds.html#west-spdx)
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### zspdx
+
+						Three stages:
+
+						* **walker**: analyze the build
+						  * parse CMake JSON metadata
+						  * analyze relationships between targets and files
+						  * optionally: analyze includes via dry-run recompiles
+						* **scanner**: scan files for hashes and license IDs
+						* **writer**: output SPDX documents
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Current Deficiencies
+
+						Makes several assumptions about user's build process
+
+						Limited to files that CMake reports in metadata
+
+						Treats _all_ CMake target stages as SPDX Packages
+
+						Not everyone wants source-level SBOMs
+
+						Doesn't include all NTIA minimum fields
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Discussion
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Usage
+
+						Who is using this now?
+
+						Who would be interested in using this?
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Assumptions
+
+						Which assumptions are wrong?
+						* use of CMake, SDK, ...
+						* structure of code trees
+						* relationships between files
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Next features
+
+						What else would be useful to have?
+						* Simplified SBOMs (package level only)
+						* Include all NTIA-required fields
+						* Better licensing info and detection
+						* Pick up more details on file versions
+						* Analyze files differently
+						* Include details on build tools used
+						* Generate distribution tarball with sources
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Community
+
+						Are you willing to participate in improving / testing?
+						* collaborate on identifying use cases, build setups
+						* validate assumptions
+						* explore which files should be included vs. excluded
+						* add and improve features
+
+						- - -
+
+						If yes, contact me!
+
+						steve@swinslow.net
+
+						GitHub: swinslow
+					</textarea>
+				</section>
+				<section data-markdown>
+					<textarea data-template>
+						### Thank you
+
+						slides and talk: CC-BY-4.0
+
+						[github.com/swinslow/slides](https://github.com/swinslow/slides)
+
+						Zephyr Developer Summit 2022
+					</textarea>
+				</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ],
+
+				transition: 'none',
+				transitionSpeed: 'fast'
+			});
+		</script>
+	</body>
+</html>
